@@ -1,0 +1,43 @@
+{
+  "testType": "latency",
+  "timestamp": "2026-01-07T02:40:05.506Z",
+  "results": {
+    "http": {
+      "messageCount": 20,
+      "avgLatency": 177.45,
+      "minLatency": 128,
+      "maxLatency": 295,
+      "medianLatency": 163,
+      "latencies": [
+        128,
+        130,
+        136,
+        143,
+        150,
+        152,
+        152,
+        153,
+        157,
+        159,
+        163,
+        174,
+        185,
+        186,
+        193,
+        199,
+        208,
+        223,
+        263,
+        295
+      ],
+      "timestamp": "2026-01-07T02:39:50.496Z"
+    },
+    "sse": {
+      "duration": 15,
+      "messagesReceived": 0,
+      "avgSSELatency": 0,
+      "latencies": [],
+      "timestamp": "2026-01-07T02:40:05.505Z"
+    }
+  }
+}
