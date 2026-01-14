@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
+echo "Current directory: $(pwd)"
+echo "Listing files:"
+ls -la
+
 echo "Building frontend..."
-cd chat-app/frontend
+cd frontend
 
 echo "Installing dependencies..."
 npm install --legacy-peer-deps
