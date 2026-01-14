@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "cd chat-app/frontend && npm install && npx react-scripts build",
+  "buildCommand": "chmod +x build.sh && ./build.sh",
   "outputDirectory": "chat-app/frontend/build",
   "framework": null,
-  "installCommand": "echo 'Skipping install'",
+  "installCommand": "echo 'Skipping root install'",
   "devCommand": "cd chat-app/frontend && npm start"
 }
