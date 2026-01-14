@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "chmod +x ../build.sh && ../build.sh",
-  "outputDirectory": "frontend/build",
-  "framework": null,
-  "installCommand": "echo 'Skipping root install'",
-  "devCommand": "npm start"
-}
