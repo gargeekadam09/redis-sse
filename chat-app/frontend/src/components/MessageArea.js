@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Circle } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
 
 const MessageArea = ({ selectedUser, messages, onSendMessage }) => {
   const [newMessage, setNewMessage] = useState('');

@@ -5,11 +5,10 @@ export const useNotifications = () => {
   const [permission, setPermission] = useState(Notification.permission);
 
   useEffect(() => {
- 
     if (permission === 'default') {
       requestPermission();
     }
-  }, []);
+  }, [permission, requestPermission]);
 
   const requestPermission = async () => {
     try {

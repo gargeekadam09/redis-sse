@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      await axios.post('/api/auth/register', userData);
 
       toast.success('Account created successfully! Please log in.');
       return { success: true, message: 'Account created successfully! Please log in.' };

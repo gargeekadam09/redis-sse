@@ -1,5 +1,4 @@
 import React from 'react';
-import { Circle } from 'lucide-react';
 
 const UserList = ({ users, selectedUser, onSelectUser, unreadCounts = {} }) => {
   // Filter out test users created by testing scripts
@@ -21,17 +20,6 @@ const UserList = ({ users, selectedUser, onSelectUser, unreadCounts = {} }) => {
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  const formatLastSeen = (lastSeen) => {
-    const date = new Date(lastSeen);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
-    return date.toLocaleDateString();
   };
 
   return (

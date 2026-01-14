@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import UserList from './UserList';
 import MessageArea from './MessageArea';
@@ -6,7 +6,7 @@ import NotificationSettings from './NotificationSettings';
 import { useSSE } from '../hooks/useSSE';
 import { useNotifications } from '../hooks/useNotifications';
 import { useSoundNotifications } from '../hooks/useSoundNotifications';
-import { Settings, Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import axios from 'axios';
 
 const Chat = () => {
@@ -47,7 +47,7 @@ const Chat = () => {
       fetchUsers();
       fetchUnreadCounts();
     }
-  }, [user]);
+  }, [user, fetchUsers, fetchUnreadCounts]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -60,7 +60,7 @@ const Chat = () => {
     }
   }, [selectedUser]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await axios.get('/api/users');
       
@@ -73,7 +73,7 @@ const Chat = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
     }
-  };
+  }, [user]);
 
   const fetchMessages = async (userId) => {
     try {
@@ -84,14 +84,14 @@ const Chat = () => {
     }
   };
 
-  const fetchUnreadCounts = async () => {
+  const fetchUnreadCounts = useCallback(async () => {
     try {
       const response = await axios.get('/api/chat/unread-counts');
       setUnreadCounts(response.data);
     } catch (error) {
       console.error('Error fetching unread counts:', error);
     }
-  };
+  }, []);
 
   const markMessagesAsRead = async (senderId) => {
     try {
