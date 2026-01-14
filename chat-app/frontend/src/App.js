@@ -24,7 +24,7 @@ function App() {
   );
 }
 
-// Protected route component
+
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
   
@@ -39,7 +39,6 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
-// Public route component (redirect if already logged in)
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   

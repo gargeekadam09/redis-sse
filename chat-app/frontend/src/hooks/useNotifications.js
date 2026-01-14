@@ -5,7 +5,7 @@ export const useNotifications = () => {
   const [permission, setPermission] = useState(Notification.permission);
 
   useEffect(() => {
-    // Request notification permission on mount
+ 
     if (permission === 'default') {
       requestPermission();
     }
@@ -37,10 +37,9 @@ export const useNotifications = () => {
         ...options
       });
 
-      // Auto close after 5 seconds
+    
       setTimeout(() => notification.close(), 5000);
 
-      // Focus window when notification is clicked
       notification.onclick = () => {
         window.focus();
         notification.close();

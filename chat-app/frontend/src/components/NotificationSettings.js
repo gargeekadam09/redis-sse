@@ -14,7 +14,7 @@ const NotificationSettings = ({ onClose }) => {
   });
 
   useEffect(() => {
-    // Load settings from localStorage
+   
     const savedSettings = localStorage.getItem('notificationSettings');
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));

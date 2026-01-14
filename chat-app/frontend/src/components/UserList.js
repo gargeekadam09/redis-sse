@@ -1,7 +1,19 @@
 import React from 'react';
 import { Circle } from 'lucide-react';
 
-const UserList = ({ users, onlineUsers, selectedUser, onSelectUser, unreadCounts = {} }) => {
+const UserList = ({ users, selectedUser, onSelectUser, unreadCounts = {} }) => {
+  // Filter out test users created by testing scripts
+  const filteredUsers = users.filter(user => {
+    const name = user.name.toLowerCase();
+    const email = user.email.toLowerCase();
+    return !name.includes('throughput') && 
+           !name.includes('scale') && 
+           !name.includes('testuser') &&
+           !email.includes('throughput') &&
+           !email.includes('scale') &&
+           !email.includes('test.com');
+  });
+
   const getInitials = (name) => {
     return name
       .split(' ')
@@ -27,8 +39,7 @@ const UserList = ({ users, onlineUsers, selectedUser, onSelectUser, unreadCounts
       <div className="p-4">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Users</h2>
         <div className="space-y-2">
-          {users.map((user) => {
-            const isOnline = onlineUsers.has(user._id);
+          {filteredUsers.map((user) => {
             const isSelected = selectedUser?.id === user._id;
             const unreadCount = unreadCounts[user._id] || 0;
             
@@ -55,12 +66,6 @@ const UserList = ({ users, onlineUsers, selectedUser, onSelectUser, unreadCounts
                       getInitials(user.name)
                     )}
                   </div>
-                  {/* Online indicator */}
-                  <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
-                    isOnline ? 'bg-green-500' : 'bg-gray-400'
-                  }`}>
-                    <Circle className="w-full h-full" fill="currentColor" />
-                  </div>
                 </div>
 
                 {/* User info */}
@@ -70,9 +75,6 @@ const UserList = ({ users, onlineUsers, selectedUser, onSelectUser, unreadCounts
                       {user.name}
                     </p>
                     <div className="flex items-center space-x-2">
-                      {isOnline && (
-                        <span className="text-xs text-green-600 font-medium">Online</span>
-                      )}
                       {unreadCount > 0 && (
                         <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                           {unreadCount > 9 ? '9+' : unreadCount}
@@ -81,7 +83,7 @@ const UserList = ({ users, onlineUsers, selectedUser, onSelectUser, unreadCounts
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 truncate">
-                    {isOnline ? 'Active now' : `Last seen ${formatLastSeen(user.lastSeen)}`}
+                    {user.email}
                   </p>
                 </div>
               </div>
@@ -89,7 +91,7 @@ const UserList = ({ users, onlineUsers, selectedUser, onSelectUser, unreadCounts
           })}
         </div>
 
-        {users.length === 0 && (
+        {filteredUsers.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">No users found</p>
           </div>

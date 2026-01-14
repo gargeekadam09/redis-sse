@@ -24,11 +24,11 @@ class ScalabilityTester {
       await Promise.allSettled(batchPromises);
       console.log(`✅ Created batch ${batch + 1}/${Math.ceil(count / batchSize)}`);
       
-      // Small delay between batches to avoid overwhelming the server
+    
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    console.log(`📊 Total users created: ${this.users.length}`);
+    console.log(`Total users created: ${this.users.length}`);
   }
 
   async createSingleUser(index) {
@@ -115,7 +115,7 @@ class ScalabilityTester {
         results.successful++;
         
         if ((i + 1) % 10 === 0) {
-          console.log(`📡 ${i + 1}/${connectionsToTest} connections tested`);
+          console.log(` ${i + 1}/${connectionsToTest} connections tested`);
         }
         
       } catch (error) {
@@ -148,7 +148,7 @@ class ScalabilityTester {
       timestamp: new Date().toISOString()
     };
 
-    console.log(`\n📊 CONCURRENT CONNECTIONS RESULTS:`);
+    console.log(`\n CONCURRENT CONNECTIONS RESULTS:`);
     console.log(`Successful Connections: ${results.successful}/${connectionsToTest}`);
     console.log(`Failed Connections: ${results.failed}`);
     console.log(`Success Rate: ${testResults.successRate}%`);
@@ -159,7 +159,7 @@ class ScalabilityTester {
 
   // Test SSE connections scalability
   async testSSEConnections(maxConnections = 50, testDuration = 30000) {
-    console.log(`\n📡 Testing SSE connections scalability:`);
+    console.log(`\n Testing SSE connections scalability:`);
     console.log(`- Maximum SSE connections: ${maxConnections}`);
     console.log(`- Test duration: ${testDuration / 1000}s`);
 
@@ -212,7 +212,7 @@ class ScalabilityTester {
     }
 
     // Wait for test duration
-    console.log(`⏱️ Maintaining ${connections.length} SSE connections for ${testDuration / 1000}s...`);
+    console.log(` Maintaining ${connections.length} SSE connections for ${testDuration / 1000}s...`);
     
     // Send periodic messages to test the connections
     const messageInterval = setInterval(async () => {
@@ -272,7 +272,7 @@ class ScalabilityTester {
 
   // Test load under stress
   async testLoadStress(userCount = 20, messagesPerUser = 10, duration = 60000) {
-    console.log(`\n🔥 Testing load stress:`);
+    console.log(`\n Testing load stress:`);
     console.log(`- ${userCount} concurrent users`);
     console.log(`- ${messagesPerUser} messages per user`);
     console.log(`- Duration: ${duration / 1000}s`);
@@ -341,7 +341,7 @@ class ScalabilityTester {
       timestamp: new Date().toISOString()
     };
 
-    console.log(`\n📊 LOAD STRESS RESULTS:`);
+    console.log(`\nLOAD STRESS RESULTS:`);
     console.log(`Messages Sent: ${results.messagesSent}`);
     console.log(`Successful: ${results.messagesSuccessful}`);
     console.log(`Failed: ${results.messagesFailed}`);
@@ -360,7 +360,7 @@ class ScalabilityTester {
     };
 
     fs.writeFileSync(filename, JSON.stringify(data, null, 2));
-    console.log(`💾 Results saved to ${filename}`);
+    console.log(`Results saved to ${filename}`);
   }
 
   // Cleanup
@@ -421,7 +421,7 @@ async function runScalabilityTests() {
     tester.saveResults(allResults, `scalability-test-${Date.now()}.json`);
     
   } catch (error) {
-    console.error('❌ Test failed:', error.message);
+    console.error('Test failed:', error.message);
   } finally {
     await tester.cleanup();
   }

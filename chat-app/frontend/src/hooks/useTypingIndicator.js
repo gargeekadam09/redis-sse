@@ -1,30 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 export const useTypingIndicator = (selectedUserId) => {
-  const [typingUsers, setTypingUsers] = useState(new Set());
   const [isTyping, setIsTyping] = useState(false);
-  const typingTimeoutRef = useState(null);
+  const typingTimeoutRef = useRef(null);
+  const isTypingRef = useRef(false);
 
-  // Send typing indicator
-  const sendTypingIndicator = useCallback(async (isTyping) => {
+  const startTyping = useCallback(() => {
     if (!selectedUserId) return;
     
-    try {
-      await axios.post('/api/chat/typing', {
-        receiverId: selectedUserId,
-        isTyping
-      });
-    } catch (error) {
-      console.error('Error sending typing indicator:', error);
-    }
-  }, [selectedUserId]);
-
-  // Handle typing start
-  const handleTypingStart = useCallback(() => {
-    if (!isTyping) {
+    // Send typing indicator if not already typing
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
       setIsTyping(true);
-      sendTypingIndicator(true);
+      
+      axios.post('/api/chat/typing', {
+        receiverId: selectedUserId,
+        isTyping: true
+      }).catch(err => console.error('Typing indicator error:', err));
     }
 
     // Clear existing timeout
@@ -32,54 +25,35 @@ export const useTypingIndicator = (selectedUserId) => {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Set timeout to stop typing indicator
+    // Stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
+      isTypingRef.current = false;
       setIsTyping(false);
-      sendTypingIndicator(false);
+      
+      axios.post('/api/chat/typing', {
+        receiverId: selectedUserId,
+        isTyping: false
+      }).catch(err => console.error('Typing indicator error:', err));
     }, 2000);
-  }, [isTyping, sendTypingIndicator]);
+  }, [selectedUserId]);
 
-  // Handle typing stop
-  const handleTypingStop = useCallback(() => {
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-    
-    setTimeout(() => {
-      setIsTyping(false);
-      sendTypingIndicator(false);
-    }, 1000);
-  }, [sendTypingIndicator]);
-
-  // Add typing user
-  const addTypingUser = useCallback((userId) => {
-    setTypingUsers(prev => new Set([...prev, userId]));
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-      setTypingUsers(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(userId);
-        return newSet;
-      });
-    }, 3000);
-  }, []);
-
-  // Remove typing user
-  const removeTypingUser = useCallback((userId) => {
-    setTypingUsers(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(userId);
-      return newSet;
-    });
-  }, []);
+  // Cleanup on unmount or user change
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      if (isTypingRef.current && selectedUserId) {
+        axios.post('/api/chat/typing', {
+          receiverId: selectedUserId,
+          isTyping: false
+        }).catch(err => console.error('Typing indicator error:', err));
+      }
+    };
+  }, [selectedUserId]);
 
   return {
-    typingUsers,
     isTyping,
-    handleTypingStart,
-    handleTypingStop,
-    addTypingUser,
-    removeTypingUser
+    startTyping
   };
 };

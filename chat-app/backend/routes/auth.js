@@ -2,26 +2,24 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
-const redisClient = require('../config/redis');
 
 const router = express.Router();
 
-// Register
+
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create user
+
     const user = new User({ name, email, password });
     await user.save();
 
-    // Generate token
+
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
@@ -42,32 +40,24 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-
-    // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Update online status
-    user.isOnline = true;
+    // Update last seen
     user.lastSeen = new Date();
     await user.save();
 
-    // Store online status in Redis
-    await redisClient.setEx(`user:${user._id}:online`, 3600, 'true');
-
-    // Generate token
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
@@ -80,8 +70,7 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        avatar: user.avatar,
-        isOnline: user.isOnline
+        avatar: user.avatar
       }
     });
   } catch (error) {
@@ -89,16 +78,12 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Logout
+
 router.post('/logout', auth, async (req, res) => {
   try {
-    // Update offline status
-    req.user.isOnline = false;
+    // Update last seen
     req.user.lastSeen = new Date();
     await req.user.save();
-
-    // Remove from Redis
-    await redisClient.del(`user:${req.user._id}:online`);
 
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
@@ -106,7 +91,7 @@ router.post('/logout', auth, async (req, res) => {
   }
 });
 
-// Get current user
+
 router.get('/me', auth, (req, res) => {
   res.json({
     user: {

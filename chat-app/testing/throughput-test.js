@@ -18,10 +18,9 @@ class ThroughputTester {
           password: 'testpass123'
         };
 
-        // Register user
+ 
         await axios.post(`${this.baseURL}/api/auth/register`, userData);
-        
-        // Login user
+  
         const loginResponse = await axios.post(`${this.baseURL}/api/auth/login`, {
           email: userData.email,
           password: userData.password
@@ -33,10 +32,10 @@ class ThroughputTester {
           userId: loginResponse.data.user.id
         });
 
-        console.log(`✅ Created user: ${userData.name}`);
+        console.log(`Created user: ${userData.name}`);
       } catch (error) {
         if (error.response?.data?.message?.includes('already exists')) {
-          // User exists, try to login
+
           const loginResponse = await axios.post(`${this.baseURL}/api/auth/login`, {
             email: `throughput${i + 1}@test.com`,
             password: 'testpass123'
@@ -53,9 +52,9 @@ class ThroughputTester {
     }
   }
 
-  // Test concurrent message sending
+  
   async testConcurrentThroughput(messagesPerUser = 100, concurrentUsers = 5) {
-    console.log(`\n🚀 Testing concurrent throughput:`);
+    console.log(`\n Testing concurrent throughput:`);
     console.log(`- ${concurrentUsers} concurrent users`);
     console.log(`- ${messagesPerUser} messages per user`);
     console.log(`- Total messages: ${concurrentUsers * messagesPerUser}`);
@@ -83,7 +82,7 @@ class ThroughputTester {
       promises.push(userPromise);
     }
 
-    // Wait for all users to complete
+
     const userResults = await Promise.allSettled(promises);
     
     // Aggregate results
@@ -115,7 +114,7 @@ class ThroughputTester {
       timestamp: new Date().toISOString()
     };
 
-    console.log(`\n📊 THROUGHPUT TEST RESULTS:`);
+    console.log(`\n THROUGHPUT TEST RESULTS:`);
     console.log(`Total Messages: ${totalMessages}`);
     console.log(`Successful: ${results.successful}`);
     console.log(`Failed: ${results.failed}`);
@@ -126,7 +125,7 @@ class ThroughputTester {
     return testResults;
   }
 
-  // Send messages for a single user
+
   async sendMessagesForUser(sender, receiver, messageCount, userIndex) {
     const results = { successful: 0, failed: 0, errors: [] };
     
@@ -140,7 +139,7 @@ class ThroughputTester {
           },
           {
             headers: { Authorization: `Bearer ${sender.token}` },
-            timeout: 5000 // 5 second timeout
+            timeout: 5000 
           }
         );
         
@@ -159,9 +158,9 @@ class ThroughputTester {
     return results;
   }
 
-  // Test burst throughput
+
   async testBurstThroughput(burstSize = 50, burstCount = 10, delayBetweenBursts = 1000) {
-    console.log(`\n💥 Testing burst throughput:`);
+    console.log(`\n Testing burst throughput:`);
     console.log(`- ${burstCount} bursts of ${burstSize} messages each`);
     console.log(`- ${delayBetweenBursts}ms delay between bursts`);
 
@@ -175,7 +174,7 @@ class ThroughputTester {
       const burstStartTime = Date.now();
       const promises = [];
       
-      // Send burst of messages simultaneously
+     
       for (let i = 0; i < burstSize; i++) {
         const promise = axios.post(
           `${this.baseURL}/api/chat/send`,
@@ -191,7 +190,6 @@ class ThroughputTester {
         promises.push(promise);
       }
       
-      // Wait for all messages in burst to complete
       const results = await Promise.allSettled(promises);
       const burstEndTime = Date.now();
       
@@ -210,13 +208,12 @@ class ThroughputTester {
       
       console.log(`Burst ${burst + 1}: ${successful}/${burstSize} successful, ${burstThroughput.toFixed(2)} msg/s`);
       
-      // Wait before next burst
+      
       if (burst < burstCount - 1) {
         await new Promise(resolve => setTimeout(resolve, delayBetweenBursts));
       }
     }
     
-    // Calculate overall burst statistics
     const totalSuccessful = burstResults.reduce((sum, b) => sum + b.successful, 0);
     const totalMessages = burstCount * burstSize;
     const avgThroughput = burstResults.reduce((sum, b) => sum + b.throughput, 0) / burstCount;
@@ -232,7 +229,7 @@ class ThroughputTester {
       timestamp: new Date().toISOString()
     };
     
-    console.log(`\n📊 BURST THROUGHPUT RESULTS:`);
+    console.log(`\n BURST THROUGHPUT RESULTS:`);
     console.log(`Total Messages: ${totalMessages}`);
     console.log(`Total Successful: ${totalSuccessful}`);
     console.log(`Average Throughput: ${testResults.avgThroughput} messages/second`);
@@ -241,7 +238,7 @@ class ThroughputTester {
     return testResults;
   }
 
-  // Save results to file
+
   saveResults(results, filename) {
     const data = {
       testType: 'throughput',
@@ -250,12 +247,12 @@ class ThroughputTester {
     };
 
     fs.writeFileSync(filename, JSON.stringify(data, null, 2));
-    console.log(`💾 Results saved to ${filename}`);
+    console.log(` Results saved to ${filename}`);
   }
 
   // Cleanup
   async cleanup() {
-    console.log('\n🧹 Cleaning up test users...');
+    console.log('\n Cleaning up test users...');
     for (const user of this.users) {
       try {
         await axios.post(
@@ -264,26 +261,23 @@ class ThroughputTester {
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
       } catch (error) {
-        // Ignore logout errors
+     
       }
     }
   }
 }
 
-// Run throughput tests
+
 async function runThroughputTests() {
   const tester = new ThroughputTester();
   
   try {
     await tester.createTestUsers(10);
     
-    // Test concurrent throughput
     const concurrentResults = await tester.testConcurrentThroughput(50, 5);
-    
-    // Test burst throughput
+  
     const burstResults = await tester.testBurstThroughput(30, 5, 2000);
-    
-    // Save results
+
     const allResults = {
       concurrent: concurrentResults,
       burst: burstResults
@@ -292,16 +286,14 @@ async function runThroughputTests() {
     tester.saveResults(allResults, `throughput-test-${Date.now()}.json`);
     
   } catch (error) {
-    console.error('❌ Test failed:', error.message);
+    console.error('Test failed:', error.message);
   } finally {
     await tester.cleanup();
   }
 }
 
-// Export for use in other scripts
 module.exports = ThroughputTester;
 
-// Run if called directly
 if (require.main === module) {
   runThroughputTests();
 }

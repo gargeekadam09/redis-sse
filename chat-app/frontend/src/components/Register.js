@@ -43,11 +43,10 @@ const Register = () => {
     });
 
     if (result.success) {
-      // Show success message and redirect to login
       toast.success('Account created successfully! Please log in.');
       setTimeout(() => {
         navigate('/login');
-      }, 2000); // Wait 2 seconds to show the success message
+      }, 2000);
     }
     setLoading(false);
   };

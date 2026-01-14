@@ -1,12 +1,11 @@
 const express = require('express');
-const auth = require('../middleware/auth');
+const sseAuth = require('../middleware/sseAuth');
 const redisClient = require('../config/redis');
 
 const router = express.Router();
 
-// SSE endpoint for real-time notifications
-router.get('/notifications', auth, (req, res) => {
-  // Set SSE headers
+// Simple SSE endpoint for real-time notifications
+router.get('/notifications', sseAuth, async (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -17,14 +16,16 @@ router.get('/notifications', auth, (req, res) => {
 
   const userId = req.user._id.toString();
   
-  // Send initial connection message
   res.write(`data: ${JSON.stringify({ type: 'connected', message: 'SSE connected' })}\n\n`);
 
-  // Subscribe to Redis channel for this user
+  // Create a new Redis client for this connection
   const subscriber = redisClient.duplicate();
   
-  subscriber.connect().then(() => {
-    subscriber.subscribe(`user:${userId}:messages`, (message) => {
+  try {
+    await subscriber.connect();
+    
+    // Subscribe to user's message channel
+    await subscriber.subscribe(`user:${userId}:messages`, (message) => {
       try {
         const messageData = JSON.parse(message);
         res.write(`data: ${JSON.stringify({ 
@@ -36,81 +37,26 @@ router.get('/notifications', auth, (req, res) => {
       }
     });
 
-    // Subscribe to user status updates
-    subscriber.subscribe(`user:${userId}:status`, (message) => {
-      try {
-        const statusData = JSON.parse(message);
-        res.write(`data: ${JSON.stringify({ 
-          type: 'user_status', 
-          data: statusData 
-        })}\n\n`);
-      } catch (error) {
-        console.error('Error parsing status:', error);
-      }
-    });
-  });
+    console.log(`User ${userId} connected to SSE`);
+  } catch (error) {
+    console.error('Redis subscription error:', error);
+  }
 
-  // Handle client disconnect
-  req.on('close', () => {
-    subscriber.unsubscribe();
-    subscriber.quit();
-  });
-
-  // Keep connection alive
+  // Keep alive ping
   const keepAlive = setInterval(() => {
     res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
   }, 30000);
 
-  req.on('close', () => {
+  // Cleanup on disconnect
+  req.on('close', async () => {
     clearInterval(keepAlive);
-  });
-});
-
-// SSE endpoint for online users
-router.get('/online-users', auth, (req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Cache-Control'
-  });
-
-  const userId = req.user._id.toString();
-  
-  // Send initial connection
-  res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
-
-  // Subscribe to global user status updates
-  const subscriber = redisClient.duplicate();
-  
-  subscriber.connect().then(() => {
-    subscriber.subscribe('user:status:global', (message) => {
-      try {
-        const statusData = JSON.parse(message);
-        res.write(`data: ${JSON.stringify({ 
-          type: 'user_status_update', 
-          data: statusData 
-        })}\n\n`);
-      } catch (error) {
-        console.error('Error parsing global status:', error);
-      }
-    });
-  });
-
-  // Handle client disconnect
-  req.on('close', () => {
-    subscriber.unsubscribe();
-    subscriber.quit();
-  });
-
-  // Keep connection alive
-  const keepAlive = setInterval(() => {
-    res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
-  }, 30000);
-
-  req.on('close', () => {
-    clearInterval(keepAlive);
+    try {
+      await subscriber.unsubscribe();
+      await subscriber.quit();
+      console.log(`User ${userId} disconnected from SSE`);
+    } catch (error) {
+      console.error('Error cleaning up SSE connection:', error);
+    }
   });
 });
 

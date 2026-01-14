@@ -9,7 +9,7 @@ export const useSSE = (url, onMessage) => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    // Create EventSource with authorization
+
     const fullUrl = `${API_BASE_URL}${url}?token=${token}`;
     const eventSource = new EventSource(fullUrl);
     eventSourceRef.current = eventSource;
@@ -40,7 +40,7 @@ export const useSSE = (url, onMessage) => {
       }, 3000);
     };
 
-    // Cleanup on unmount
+   
     return () => {
       eventSource.close();
     };

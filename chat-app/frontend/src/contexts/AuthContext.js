@@ -2,9 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const AuthContext = createContext();
-
-// Set API base URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 axios.defaults.baseURL = API_BASE_URL;
 
@@ -22,7 +19,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Set up axios defaults
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -30,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Check if user is logged in on app start
+
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
@@ -38,6 +34,9 @@ export const AuthProvider = ({ children }) => {
         try {
           const response = await axios.get('/api/auth/me');
           setUser(response.data.user);
+          
+          // Broadcast online status after successful auth check
+          // This will be handled by the SSE connection in Chat component
         } catch (error) {
           localStorage.removeItem('token');
           delete axios.defaults.headers.common['Authorization'];
@@ -52,8 +51,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await axios.post('/api/auth/register', userData);
-      
-      // Don't automatically log in the user
+
       toast.success('Account created successfully! Please log in.');
       return { success: true, message: 'Account created successfully! Please log in.' };
     } catch (error) {

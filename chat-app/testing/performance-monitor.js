@@ -124,11 +124,11 @@ class PerformanceMonitor {
   // Start monitoring
   startMonitoring(interval = 1000) {
     if (this.isMonitoring) {
-      console.log('⚠️ Monitoring already started');
+      console.log('Monitoring already started');
       return;
     }
 
-    console.log(`🔍 Starting performance monitoring (interval: ${interval}ms)`);
+    console.log(`Starting performance monitoring (interval: ${interval}ms)`);
     this.isMonitoring = true;
     this.metrics = [];
 
@@ -146,7 +146,7 @@ class PerformanceMonitor {
         
         // Log every 10 seconds
         if (this.metrics.length % 10 === 0) {
-          console.log(`📊 Collected ${this.metrics.length} metrics | CPU: ${systemMetrics.cpu.usage}% | Memory: ${systemMetrics.memory.usagePercent}%`);
+          console.log(` Collected ${this.metrics.length} metrics | CPU: ${systemMetrics.cpu.usage}% | Memory: ${systemMetrics.memory.usagePercent}%`);
         }
         
       } catch (error) {
@@ -158,11 +158,11 @@ class PerformanceMonitor {
   // Stop monitoring
   stopMonitoring() {
     if (!this.isMonitoring) {
-      console.log('⚠️ Monitoring not started');
+      console.log(' Monitoring not started');
       return;
     }
 
-    console.log('🛑 Stopping performance monitoring');
+    console.log(' Stopping performance monitoring');
     this.isMonitoring = false;
     
     if (this.monitoringInterval) {
@@ -174,11 +174,11 @@ class PerformanceMonitor {
   // Analyze collected metrics
   analyzeMetrics() {
     if (this.metrics.length === 0) {
-      console.log('⚠️ No metrics collected');
+      console.log('No metrics collected');
       return null;
     }
 
-    console.log(`\n📊 Analyzing ${this.metrics.length} metrics...`);
+    console.log(`\n Analyzing ${this.metrics.length} metrics...`);
 
     // CPU analysis
     const cpuUsages = this.metrics.map(m => m.cpu.usage);
@@ -232,7 +232,7 @@ class PerformanceMonitor {
       timestamp: new Date().toISOString()
     };
 
-    console.log(`\n📊 PERFORMANCE ANALYSIS RESULTS:`);
+    console.log(`\n PERFORMANCE ANALYSIS RESULTS:`);
     console.log(`Duration: ${duration}s`);
     console.log(`CPU Usage - Avg: ${analysis.cpu.average}%, Max: ${analysis.cpu.maximum}%, Min: ${analysis.cpu.minimum}%`);
     console.log(`Memory Usage - Avg: ${analysis.memory.average}%, Max: ${analysis.memory.maximum}%, Min: ${analysis.memory.minimum}%`);
@@ -295,13 +295,13 @@ class PerformanceMonitor {
     }
 
     fs.writeFileSync(filename, JSON.stringify(data, null, 2));
-    console.log(`💾 Performance metrics saved to ${filename}`);
+    console.log(` Performance metrics saved to ${filename}`);
   }
 
   // Clear collected metrics
   clearMetrics() {
     this.metrics = [];
-    console.log('🧹 Metrics cleared');
+    console.log(' Metrics cleared');
   }
 }
 
@@ -312,7 +312,7 @@ async function monitorPerformanceExample() {
   // Monitor for 30 seconds
   monitor.startMonitoring(1000);
   
-  console.log('🔍 Monitoring system performance for 30 seconds...');
+  console.log(' Monitoring system performance for 30 seconds...');
   await new Promise(resolve => setTimeout(resolve, 30000));
   
   monitor.stopMonitoring();

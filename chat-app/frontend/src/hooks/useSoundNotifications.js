@@ -3,7 +3,7 @@ import { useRef, useCallback } from 'react';
 export const useSoundNotifications = () => {
   const audioRef = useRef(null);
 
-  // Create audio context for different sounds
+
   const createAudioContext = useCallback(() => {
     if (!audioRef.current) {
       audioRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -11,7 +11,6 @@ export const useSoundNotifications = () => {
     return audioRef.current;
   }, []);
 
-  // Generate notification sound using Web Audio API
   const playNotificationSound = useCallback((type = 'message') => {
     try {
       const audioContext = createAudioContext();
@@ -21,7 +20,6 @@ export const useSoundNotifications = () => {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Different sounds for different notifications
       switch (type) {
         case 'message':
           oscillator.frequency.setValueAtTime(800, audioContext.currentTime);

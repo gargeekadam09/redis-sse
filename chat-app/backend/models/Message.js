@@ -32,7 +32,7 @@ const messageSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for efficient queries
+
 messageSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Message', messageSchema);

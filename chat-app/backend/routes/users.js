@@ -2,38 +2,28 @@ const express = require('express');
 const User = require('../models/User');
 const Message = require('../models/Message');
 const auth = require('../middleware/auth');
-const redisClient = require('../config/redis');
 
 const router = express.Router();
 
-// Get all users with online status
+
 router.get('/', auth, async (req, res) => {
   try {
+    // Get all users except the current user
     const users = await User.find({ _id: { $ne: req.user._id } })
-      .select('name email avatar isOnline lastSeen')
+      .select('name email avatar lastSeen')
       .sort({ name: 1 });
 
-    // Check Redis for real-time online status
-    const usersWithStatus = await Promise.all(
-      users.map(async (user) => {
-        const isOnlineRedis = await redisClient.get(`user:${user._id}:online`);
-        return {
-          ...user.toObject(),
-          isOnline: !!isOnlineRedis || user.isOnline
-        };
-      })
-    );
-
-    res.json(usersWithStatus);
+    res.json(users);
   } catch (error) {
+    console.error('Error in GET /users:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Get user conversations with last message
+
 router.get('/conversations', auth, async (req, res) => {
   try {
-    // Get all users the current user has chatted with
+ 
     const conversations = await Message.aggregate([
       {
         $match: {
@@ -102,7 +92,6 @@ router.get('/conversations', auth, async (req, res) => {
       }
     ]);
 
-    // Update online status from Redis
     const conversationsWithStatus = await Promise.all(
       conversations.map(async (conv) => {
         const isOnlineRedis = await redisClient.get(`user:${conv.user._id}:online`);
@@ -122,7 +111,7 @@ router.get('/conversations', auth, async (req, res) => {
   }
 });
 
-// Update user profile
+
 router.put('/profile', auth, async (req, res) => {
   try {
     const { name, avatar } = req.body;

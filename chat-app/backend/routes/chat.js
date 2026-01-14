@@ -6,18 +6,17 @@ const redisClient = require('../config/redis');
 
 const router = express.Router();
 
-// Send message
+
 router.post('/send', auth, async (req, res) => {
   try {
     const { receiverId, content, messageType = 'text' } = req.body;
 
-    // Check if receiver exists
     const receiver = await User.findById(receiverId);
     if (!receiver) {
       return res.status(404).json({ message: 'Receiver not found' });
     }
 
-    // Create message
+
     const message = new Message({
       sender: req.user._id,
       receiver: receiverId,
@@ -27,10 +26,10 @@ router.post('/send', auth, async (req, res) => {
 
     await message.save();
 
-    // Populate sender info
+
     await message.populate('sender', 'name avatar');
 
-    // Store in Redis for real-time delivery
+
     const messageData = {
       _id: message._id,
       sender: {
@@ -45,7 +44,7 @@ router.post('/send', auth, async (req, res) => {
       isRead: message.isRead
     };
 
-    // Publish to Redis channel for real-time notifications
+  
     await redisClient.publish(`user:${receiverId}:messages`, JSON.stringify(messageData));
 
     res.status(201).json(messageData);
@@ -54,7 +53,6 @@ router.post('/send', auth, async (req, res) => {
   }
 });
 
-// Get conversation between two users
 router.get('/conversation/:userId', auth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -77,7 +75,7 @@ router.get('/conversation/:userId', auth, async (req, res) => {
   }
 });
 
-// Mark messages as read
+
 router.put('/read/:senderId', auth, async (req, res) => {
   try {
     const { senderId } = req.params;
@@ -100,7 +98,7 @@ router.put('/read/:senderId', auth, async (req, res) => {
   }
 });
 
-// Get unread message counts for all conversations
+
 router.get('/unread-counts', auth, async (req, res) => {
   try {
     const unreadCounts = await Message.aggregate([
@@ -124,6 +122,24 @@ router.get('/unread-counts', auth, async (req, res) => {
     });
 
     res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Typing indicator endpoint
+router.post('/typing', auth, async (req, res) => {
+  try {
+    const { receiverId, isTyping } = req.body;
+
+    // Publish typing status via Redis
+    await redisClient.publish(`user:${receiverId}:typing`, JSON.stringify({
+      userId: req.user._id.toString(),
+      userName: req.user.name,
+      isTyping
+    }));
+
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

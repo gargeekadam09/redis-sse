@@ -11,13 +11,13 @@ const sseRoutes = require('./routes/sse');
 
 const app = express();
 
-// Rate limiting
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 1000 : 10000 // Higher limit for production
+  max: process.env.NODE_ENV === 'production' ? 1000 : 10000 
 });
 
-// Middleware
+
 app.use(limiter);
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
@@ -27,18 +27,17 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sse', sseRoutes);
 
-// Health check
+
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// MongoDB connection
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));

@@ -14,76 +14,45 @@ const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [unreadCounts, setUnreadCounts] = useState({});
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   
-  // Notification hooks
-  const { showMessageNotification, showUserStatusNotification } = useNotifications();
+
+  const { showMessageNotification } = useNotifications();
   const { playNotificationSound } = useSoundNotifications();
   
-  // SSE for real-time notifications
   useSSE('/api/sse/notifications', (data) => {
     if (data.type === 'new_message') {
       const message = data.data;
       
-      // Add new message if it's from the selected user
       if (selectedUser && message.sender._id === selectedUser.id) {
         setMessages(prev => [...prev, message]);
         markMessagesAsRead(selectedUser.id);
       } else {
-        // Update unread count for other users
         setUnreadCounts(prev => ({
           ...prev,
           [message.sender._id]: (prev[message.sender._id] || 0) + 1
         }));
         
-        // Show notifications for messages from other users
         showMessageNotification(message.sender.name, message.content);
         playNotificationSound('message');
       }
+    } else if (data.type === 'typing_indicator') {
+      // Handle typing if needed
     }
   });
 
-  // SSE for online users
-  useSSE('/api/sse/online-users', (data) => {
-    if (data.type === 'user_status_update') {
-      const { userId, isOnline, userName } = data.data;
-      
-      setOnlineUsers(prev => {
-        const newSet = new Set(prev);
-        const wasOnline = newSet.has(userId);
-        
-        if (isOnline) {
-          newSet.add(userId);
-          if (!wasOnline) {
-            showUserStatusNotification(userName, true);
-            playNotificationSound('user-online');
-          }
-        } else {
-          newSet.delete(userId);
-          if (wasOnline) {
-            showUserStatusNotification(userName, false);
-            playNotificationSound('user-offline');
-          }
-        }
-        return newSet;
-      });
-    }
-  });
-
-  // Fetch users on component mount
   useEffect(() => {
-    fetchUsers();
-    fetchUnreadCounts();
-  }, []);
+    if (user) {
+      fetchUsers();
+      fetchUnreadCounts();
+    }
+  }, [user]);
 
-  // Fetch messages when user is selected
   useEffect(() => {
     if (selectedUser) {
       fetchMessages(selectedUser.id);
       markMessagesAsRead(selectedUser.id);
-      // Clear unread count for selected user
       setUnreadCounts(prev => ({
         ...prev,
         [selectedUser.id]: 0
@@ -94,19 +63,13 @@ const Chat = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get('/api/users');
-      console.log('Current user ID:', user?.id);
-      console.log('Fetched users:', response.data.map(u => ({ id: u._id, name: u.name })));
       
-      setUsers(response.data); // Backend already filters out current user
-      
-      // Update online status
-      const onlineSet = new Set();
-      response.data.forEach(u => {
-        if (u.isOnline) {
-          onlineSet.add(u._id);
-        }
+      // Filter out the current user (backend should already do this)
+      const filteredUsers = response.data.filter(u => {
+        return u._id !== user?.id && u._id !== user?._id;
       });
-      setOnlineUsers(onlineSet);
+      
+      setUsers(filteredUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -148,8 +111,10 @@ const Chat = () => {
       });
 
       setMessages(prev => [...prev, response.data]);
+      return response.data;
     } catch (error) {
       console.error('Error sending message:', error);
+      throw error;
     }
   };
 
@@ -200,7 +165,6 @@ const Chat = () => {
         {/* User List */}
         <UserList
           users={users}
-          onlineUsers={onlineUsers}
           selectedUser={selectedUser}
           onSelectUser={setSelectedUser}
           unreadCounts={unreadCounts}
@@ -214,7 +178,6 @@ const Chat = () => {
             selectedUser={selectedUser}
             messages={messages}
             onSendMessage={sendMessage}
-            isOnline={onlineUsers.has(selectedUser.id)}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center bg-gray-50">
