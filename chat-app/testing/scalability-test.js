@@ -22,7 +22,7 @@ class ScalabilityTester {
       }
       
       await Promise.allSettled(batchPromises);
-      console.log(`✅ Created batch ${batch + 1}/${Math.ceil(count / batchSize)}`);
+      console.log(`Created batch ${batch + 1}/${Math.ceil(count / batchSize)}`);
       
     
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -260,7 +260,7 @@ class ScalabilityTester {
       timestamp: new Date().toISOString()
     };
 
-    console.log(`\n📊 SSE CONNECTIONS RESULTS:`);
+    console.log(`\nSSE CONNECTIONS RESULTS:`);
     console.log(`Successful SSE Connections: ${results.successful}/${connectionsToTest}`);
     console.log(`Failed Connections: ${results.failed}`);
     console.log(`Success Rate: ${testResults.successRate}%`);
@@ -365,7 +365,7 @@ class ScalabilityTester {
 
   // Cleanup
   async cleanup() {
-    console.log('\n🧹 Cleaning up test users...');
+    console.log('\nCleaning up test users...');
     
     // Close any remaining connections
     this.connections.forEach(conn => {

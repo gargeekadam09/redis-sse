@@ -26,12 +26,12 @@ class LatencyTester {
        
         try {
           await axios.post(`${this.baseURL}/api/auth/register`, userData);
-          console.log(`✅ Registered user: ${userData.name}`);
+          console.log(`Registered user: ${userData.name}`);
         } catch (regError) {
           if (regError.response?.data?.message?.includes('already exists')) {
-            console.log(`ℹ️ User ${userData.email} already exists, attempting login...`);
+            console.log(`User ${userData.email} already exists, attempting login...`);
           } else {
-            console.error(`❌ Registration failed for ${userData.email}:`, regError.response?.data || regError.message);
+            console.error(`Registration failed for ${userData.email}:`, regError.response?.data || regError.message);
             throw regError;
           }
         }
@@ -48,7 +48,7 @@ class LatencyTester {
           userId: loginResponse.data.user.id
         });
 
-        console.log(`✅ Logged in user: ${userData.name} (ID: ${loginResponse.data.user.id})`);
+        console.log(`Logged in user: ${userData.name} (ID: ${loginResponse.data.user.id})`);
       } catch (error) {
         console.error(` Failed to create/login user ${i + 1}:`, error.response?.data || error.message);
       
@@ -131,7 +131,7 @@ class LatencyTester {
 
 
   async testSSELatency(duration = 30000) {
-    console.log(`\n🔄 Testing SSE latency for ${duration/1000} seconds...`);
+    console.log(`\nTesting SSE latency for ${duration/1000} seconds...`);
     
     return new Promise((resolve) => {
       const latencies = [];

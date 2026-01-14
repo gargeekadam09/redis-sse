@@ -140,7 +140,7 @@ const MessageArea = ({ selectedUser, messages, onSendMessage }) => {
                     <div className={`mt-1 text-xs text-gray-500 ${isOwn ? 'text-right' : 'text-left'}`}>
                       {formatTime(message.createdAt)}
                       {message.isRead && isOwn && (
-                        <span className="ml-1 text-primary-400">✓✓</span>
+                        <span className="ml-1 text-primary-400">Read</span>
                       )}
                     </div>
                   </div>

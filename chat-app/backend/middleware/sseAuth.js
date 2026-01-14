@@ -1,10 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Special auth middleware for SSE that accepts token from query parameter
+// Auth middleware for SSE that accepts token from query parameter
 const sseAuth = async (req, res, next) => {
   try {
-    // Get token from query parameter (for SSE) or Authorization header (fallback)
     const token = req.query.token || req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {

@@ -249,7 +249,7 @@ class PerformanceMonitor {
 
   // Monitor during test execution
   async monitorDuringTest(testFunction, testName = 'Test') {
-    console.log(`\n🔍 Starting performance monitoring for: ${testName}`);
+    console.log(`\nStarting performance monitoring for: ${testName}`);
     
     this.startMonitoring(500); // Monitor every 500ms during test
     
